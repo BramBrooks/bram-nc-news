@@ -1,15 +1,26 @@
+// Is seed file now set up to require in either test or dev data depending on the environment?
+
+// NOTES ON SEEDFILE
+// function for logic for inserting our data in DB
+// takes a connection object and a promise parameter
+// consider the order the data needs to be inserted into the db (e.g. the one with the id first)
+
 const {
   topicData,
   articleData,
   commentData,
-  userData,
-} = require('../data/index.js');
+  userData
+} = require("../data/index.js");
 
-const { formatDates, formatComments, makeRefObj } = require('../utils/utils');
+const {
+  formatDates,
+  formatComments,
+  makeRefObj
+} = require("../utils/utils.js");
 
-exports.seed = function(knex, Promise) {
-  const topicsInsertions = knex('topics').insert(topicData);
-  const usersInsertions = knex('users').insert(userData);
+exports.seed = function(knex) {
+  const topicsInsertions = knex("topics").insert(topicData);
+  const usersInsertions = knex("users").insert(userData);
 
   return Promise.all([topicsInsertions, usersInsertions])
     .then(() => {
@@ -34,6 +45,6 @@ exports.seed = function(knex, Promise) {
 
       const articleRef = makeRefObj(articleRows);
       const formattedComments = formatComments(commentData, articleRef);
-      return knex('comments').insert(formattedComments);
+      return knex("comments").insert(formattedComments);
     });
 };
