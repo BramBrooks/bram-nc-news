@@ -1,10 +1,4 @@
-// Is seed file now set up to require in either test or dev data depending on the environment?
-
-// NOTES ON SEEDFILE
-// function for logic for inserting our data in DB
-// takes a connection object and a promise parameter
-// consider the order the data needs to be inserted into the db (e.g. the one with the id first)
-
+// link to index file in data folder
 const {
   topicData,
   articleData,
@@ -12,6 +6,7 @@ const {
   userData
 } = require("../data/index.js");
 
+// utility functions
 const {
   formatDates,
   formatComments,
@@ -22,9 +17,34 @@ exports.seed = function(knex) {
   const topicsInsertions = knex("topics").insert(topicData);
   const usersInsertions = knex("users").insert(userData);
 
-  return Promise.all([topicsInsertions, usersInsertions])
-    .then(() => {
-      /* 
+  return (
+    knex.migrate
+      .rollback()
+      .then(() => knex.migrate.latest())
+      .then(() => {
+        return Promise.all([topicsInsertions, usersInsertions]);
+      })
+      // articles
+      .then(() => {
+        // console.log("Inserted topics and users okay");
+        const formattedArticles = formatDates(articleData);
+        // console.log(formattedArticles);
+        return knex("articles")
+          .insert(formattedArticles)
+          .returning("*");
+      })
+      .then(articleRows => {
+        // console.log(makeRefObj(articleRows));
+        const articleRef = makeRefObj(articleRows);
+        // console.log(articleRef);
+        const formattedComments = formatComments(commentData, articleRef);
+        // console.log(formattedComments);
+        return knex("comments").insert(formattedComments);
+      })
+  );
+};
+
+/* 
       
       Your article data is currently in the incorrect format and will violate your SQL schema. 
       
@@ -32,9 +52,8 @@ exports.seed = function(knex) {
 
       Your comment insertions will depend on information from the seeded articles, so make sure to return the data after it's been seeded.
       */
-    })
-    .then(articleRows => {
-      /* 
+
+/* 
 
       Your comment data is currently in the incorrect format and will violate your SQL schema. 
 
@@ -42,9 +61,3 @@ exports.seed = function(knex) {
       
       You will need to write and test the provided makeRefObj and formatComments utility functions to be able insert your comment data.
       */
-
-      const articleRef = makeRefObj(articleRows);
-      const formattedComments = formatComments(commentData, articleRef);
-      return knex("comments").insert(formattedComments);
-    });
-};
