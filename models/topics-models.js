@@ -1,5 +1,8 @@
 const { connection } = require("../db/connection");
 
 exports.selectTopics = () => {
-  return connection.select("topics").from("topics");
+  console.log("hello I am a model!");
+  return connection("topics").then(() => {
+    return connection.select("*").from("topics");
+  });
 };

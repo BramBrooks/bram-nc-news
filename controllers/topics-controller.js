@@ -1,7 +1,8 @@
-const selectTopics = require("../models/topics-models");
+const { selectTopics } = require("../models/topics-models");
 
-// is this right or should it be req.body?
 exports.sendTopics = (req, res, next) => {
+  console.log("hello I am a controller!");
+
   selectTopics(req.query)
     .then(topics => {
       res.status(200).send({ topics });
